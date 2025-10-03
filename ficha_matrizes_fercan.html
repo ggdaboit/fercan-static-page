@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FUNDIMOULD – Ficha de Matrizes</title>
+  <style>
+    :root { --border:#111; --muted:#666; --gap:10px; --pad:8px; --font:"Inter", Arial, Helvetica, sans-serif; }
+    * { box-sizing: border-box; }
+    body { font-family: var(--font); color:#111; margin:0; background:#f7f7f7; }
+
+    /* Layout */
+    .app { width: 210mm; margin: 12mm auto; }
+    .toolbar { display:flex; gap:8px; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .left, .right { display:flex; gap:8px; align-items:center; }
+    button, select { padding:8px 12px; border:1px solid var(--border); background:#fff; cursor:pointer; }
+    .status { font-size:12px; color:var(--muted); }
+
+    .sheet { width:210mm; min-height:297mm; background:#fff; border:1px solid #ddd; padding:16mm; }
+    h1, h2 { margin:0; text-align:center; }
+    h1 { font-size:18px; letter-spacing:.3px; }
+    h2 { font-size:16px; font-weight:600; margin-top:4px; }
+    .hr { border-top:2px solid var(--border); margin:8px 0 14px; }
+
+    /* Grid */
+    .row { display:grid; grid-template-columns:repeat(12,1fr); gap:var(--gap); align-items:center; }
+    .label { font-size:12px; color:var(--muted); }
+
+    /* Inputs */
+    input[type=text], input[type=number], textarea { width:100%; border:none; border-bottom:1px solid var(--border); padding:6px 4px; font-size:14px; background:transparent; }
+    input[type=date] { width:100%; min-width:150px; border:none; border-bottom:1px solid var(--border); padding:6px 4px; font-size:14px; background:transparent; }
+    textarea { border:1px solid var(--border); min-height:60px; padding:6px; }
+    .check { display:inline-flex; align-items:center; gap:6px; margin-right:14px; font-size:13px; }
+    .check input { width:16px; height:16px; }
+    .groupTitle { font-weight:600; font-size:13px; margin-right:8px; }
+    .sectionTitle { font-weight:600; margin:14px 0 6px; font-size:13px; }
+
+    /* Grade */
+    .grade { margin-top:4px; border:1px solid var(--border); }
+    .grade table { border-collapse:collapse; width:100%; }
+    .grade th, .grade td { border:1px solid var(--border); text-align:center; padding:6px; font-size:12px; }
+    .grade input[type=number] { width:48px; text-align:center; border:1px solid #bbb; border-radius:2px; padding:2px; -moz-appearance:textfield; }
+    .grade input[type=number]::-webkit-outer-spin-button,
+    .grade input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    .totalRow { margin-top:6px; text-align:right; font-weight:600; font-size:13px; }
+
+    .signRow { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:28px; }
+    .sign { border-top:1px solid var(--border); text-align:center; padding-top:6px; font-size:12px; }
+
+    /* Impressão */
+    @media print {
+      body { background:#fff; }
+      .app { margin:0; width:210mm; }
+      .toolbar { display:none !important; }
+      .sheet { border:none; width:210mm; min-height:297mm; padding:16mm; box-shadow:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="left">
+        <button type="button" id="btnNovo" title="Ctrl+N">Novo</button>
+        <button type="button" id="btnImprimir" title="Ctrl+P">Exportar PDF</button>
+      </div>
+      <div class="right">
+        <select id="selRegistros" title="Abrir ficha salva"></select>
+        <button type="button" id="btnAbrir">Abrir</button>
+        <button type="button" id="btnDuplicar">Duplicar</button>
+        <button type="button" id="btnExcluir">Excluir</button>
+        <span class="status" id="status"></span>
+      </div>
+    </div>
+
+    <!-- Ficha -->
+    <form id="ficha" class="sheet" autocomplete="off">
+      <h1>FERCAN</h1>
+      <h2>FICHA DE MATRIZES</h2>
+      <div class="hr"></div>
+
+      <!-- Linha 1 -->
+      <div class="row" style="margin-bottom:6px">
+        <label class="label" style="grid-column: span 1" for="refField">REF.</label>
+        <div style="grid-column: span 2"><input type="text" id="refField" name="ref" /></div>
+        <label class="label" style="grid-column: span 1" for="fornecedor">FORNECEDOR:</label>
+        <div style="grid-column: span 4"><input type="text" id="fornecedor" name="fornecedor" /></div>
+        <label class="label" style="grid-column: span 2; text-align:right" for="data_entrada">DATA DE ENTRADA</label>
+        <div style="grid-column: span 2"><input type="date" id="data_entrada" name="data_entrada" /></div>
+      </div>
+
+      <!-- Linha 2 -->
+      <div class="row" style="margin-top:0">
+        <label class="label" style="grid-column: 9 / span 2; text-align:right" for="prev_entrega">PREV. DE ENTREGA</label>
+        <div style="grid-column: span 2"><input type="date" id="prev_entrega" name="prev_entrega" /></div>
+      </div>
+
+      <!-- Opções -->
+      <div class="row" style="margin-top:10px">
+        <div class="groupTitle" style="grid-column: span 12">Opções</div>
+        <div style="grid-column: span 12">
+          <label class="check"><input type="checkbox" name="colecao" /> Coleção</label>
+          <label class="check"><input type="checkbox" name="piloto" /> Piloto</label>
+          <label class="check"><input type="checkbox" name="repeticoes" /> Repetições</label>
+        </div>
+      </div>
+
+      <!-- Grade -->
+      <div class="sectionTitle">GRADE</div>
+      <div class="grade">
+        <table>
+          <thead>
+            <tr>
+              <th>Tamanho</th>
+              <th>25</th><th>26</th><th>27</th><th>28</th><th>29</th><th>30</th><th>31</th><th>32</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Qtd.</td>
+              <td><input type="number" class="gradeQty" name="g25"  min="0" step="1" inputmode="numeric" /></td>
+              <td><input type="number" class="gradeQty" name="g26"  min="0" step="1" inputmode="numeric" /></td>
+              <td><input type="number" class="gradeQty" name="g27"  min="0" step="1" inputmode="numeric" /></td>
+              <td><input type="number" class="gradeQty" name="g28"  min="0" step="1" inputmode="numeric" /></td>
+              <td><input type="number" class="gradeQty" name="g29"  min="0" step="1" inputmode="numeric" /></td>
+              <td><input type="number" class="gradeQty" name="g30"  min="0" step="1" inputmode="numeric" /></td>
+              <td><input type="number" class="gradeQty" name="g31"  min="0" step="1" inputmode="numeric" /></td>
+              <td><input type="number" class="gradeQty" name="g32"  min="0" step="1" inputmode="numeric" /></td>
+            </tr>
+          </tbody>
+        </table>
+        <table>
+          <thead>
+            <tr>
+              <th>Tamanho</th>
+              <th>33</th><th>34</th><th>35</th><th>36</th><th>37</th><th>38</th><th>39</th><th>40</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Qtd.</td>
+              <td><input type="number" class="gradeQty" name="g33"  min="0" step="1" inputmode="numeric" /></td>
+              <td><input type="number" class="gradeQty" name="g34"  min="0" step="1" inputmode="numeric" /></td>
+              <td><input type="number" class="gradeQty" name="g35"  min="0" step="1" inputmode="numeric" /></td>
+              <td><input type="number" class="gradeQty" name="g36"  min="0" step="1" inputmode="numeric" /></td>
+              <td><input type="number" class="gradeQty" name="g37"  min="0" step="1" inputmode="numeric" /></td>
+              <td><input type="number" class="gradeQty" name="g38"  min="0" step="1" inputmode="numeric" /></td>
+              <td><input type="number" class="gradeQty" name="g39"  min="0" step="1" inputmode="numeric" /></td>
+              <td><input type="number" class="gradeQty" name="g40"  min="0" step="1" inputmode="numeric" /></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="totalRow">Total de pares: <span id="totalLabel">0</span></div>
+
+      <!-- Tipo de matriz -->
+      <div class="sectionTitle">TIPO DE MATRIZ</div>
+      <div>
+        <label class="check"><input type="checkbox" name="matriz_pu" /> Matriz P.U</label>
+        <label class="check"><input type="checkbox" name="matriz_tr" /> Matriz T.R</label>
+        <label class="check"><input type="checkbox" name="matriz_pvc" /> Matriz P.V.C.</label>
+        <label class="check"><input type="checkbox" name="expandido" /> Expandido</label>
+      </div>
+
+      <!-- Medidas da Matriz Pronta -->
+      <div style="margin-top:12px; text-align: left;">
+          </h1>Medida da Matriz Pronta: 320x270</h1>
+      </div>
+
+      <!-- Acabamento -->
+      <div class="sectionTitle">ACABAMENTO</div>
+      <div>
+        <label class="check"><input type="checkbox" name="acab_polida" /> Polida</label>
+        <label class="check"><input type="checkbox" name="acab_semibrilho" /> Semibrilho</label>
+        <label class="check"><input type="checkbox" name="acab_jateada" /> Jateada</label>
+        <label class="check"><input type="checkbox" name="acab_escovada" /> Escovada</label>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <label class="label" style="grid-column: span 3" for="data_entrada_acab">DATA DA ENTRADA</label>
+        <div style="grid-column: span 3"><input type="date" id="data_entrada_acab" name="data_entrada_acab" /></div>
+      </div>
+
+      <!-- Vira / Anatomia -->
+      <div class="row" style="margin-top:15px">
+        <label class="label" style="grid-column: span 3" for="altura_vira">ALTURA DA VIRA</label>
+        <div style="grid-column: span 1"><input type="text" id="altura_vira" name="altura_vira" /></div>
+    </div>
+      <!-- Vira / Anatomia -->
+      <div class="row" style="margin-top:15px">
+        <label class="label" style="grid-column: span 3" for="altura_vira">LARGURA DA VIRA</label>
+        <div style="grid-column: span 1"><input type="text" id="largura_da_vira" name="largura_da_vira" /></div>
+    </div>
+          <!-- Vira / Anatomia -->
+      <div class="row" style="margin-top:15px">
+        <label class="label" style="grid-column: span 3" for="altura_vira">ANATOMIA</label>
+        <div style="grid-column: span 1"><input type="text" id="anatomia" name="anatomia" /></div>
+    </div>
+ 
+
+      <!-- Observações -->
+      <div class="sectionTitle">OBS.</div>
+      <textarea name="obs" id="obs"></textarea>
+
+      <!-- Assinaturas -->
+      <div class="signRow" style="margin-top:180px">
+        <div class="sign">ENTREGUE POR</div>
+        <div class="sign">MAQUETE RECEBIDA POR</div>
+      </div>
+    </form>
+  </div>
+
+  <script>
+  (function(){
+    'use strict';
+    const KEY = 'fichas_matrizes_v1';
+
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    let currentId = null;
+    let saveTimer = null;
+
+    function readAll(){ try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e){ return []; } }
+    function writeAll(arr){ localStorage.setItem(KEY, JSON.stringify(arr)); }
+
+    function newId(){ return (crypto.randomUUID? crypto.randomUUID() : ('id-'+Math.random().toString(36).slice(2))); }
+
+    function formToObj(){
+      const form = $('#ficha');
+      const data = { id: currentId || newId(), createdAt: new Date().toISOString() };
+      for (const el of form.elements){
+        if(!el.name) continue;
+        if(el.type === 'checkbox') data[el.name] = !!el.checked;
+        else data[el.name] = el.value ?? '';
+      }
+      data.updatedAt = new Date().toISOString();
+      data.title = `${data.ref || 's/REF'} – ${data.cliente || 's/Cliente'} – ${data.data_entrada || ''}`;
+      return data;
+    }
+
+    function objToForm(data){
+      const form = $('#ficha');
+      for (const el of form.elements){
+        if(!el.name) continue;
+        if(el.type === 'checkbox') el.checked = !!data[el.name];
+        else el.value = data[el.name] ?? '';
+      }
+      updateTotal();
+    }
+
+    function refreshSelect(){
+      const sel = $('#selRegistros');
+      const list = readAll();
+      sel.innerHTML = '';
+      for(const item of list){
+        const opt = document.createElement('option');
+        opt.value = item.id; opt.textContent = item.title || item.id;
+        sel.appendChild(opt);
+      }
+      if(currentId){ sel.value = currentId; }
+    }
+
+    function status(msg){ const s=$('#status'); if(!s) return; s.textContent = msg; setTimeout(()=> s.textContent='', 3000); }
+
+    function setTitleFromRef(){
+      const ref = ($('#refField').value || '').trim();
+      if(ref) document.title = `Ficha ${ref}`; else document.title = 'FUNDIMOULD – Ficha de Matrizes';
+    }
+
+    function updateTotal(){
+      let sum = 0;
+      $$('.gradeQty').forEach(el=>{ const n = Number(el.value); if(!Number.isNaN(n)) sum += n; });
+      const totalField = $('#quantidades');
+      const totalLabel = $('#totalLabel');
+      if(totalField) totalField.value = String(sum);
+      if(totalLabel) totalLabel.textContent = String(sum);
+      return sum;
+      
+      
+    }
+
+    function autosave(){
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(()=> save(false), 300); // salva 300ms após parar de digitar
+    }
+
+    function save(showMsg){
+      const list = readAll();
+      const payload = formToObj();
+      currentId = payload.id;
+      const ix = list.findIndex(x=>x.id === payload.id);
+      if(ix>=0) list[ix] = {...list[ix], ...payload}; else list.unshift(payload);
+      writeAll(list);
+      refreshSelect();
+      if(showMsg) status('Ficha salva.');
+    }
+
+    function novo(){
+      $('#ficha').reset();
+      currentId = newId();
+      save(false);
+      status('Nova ficha criada.');
+    }
+
+    function abrir(){
+      const id = $('#selRegistros').value; if(!id){ status('Nada selecionado.'); return; }
+      const item = readAll().find(x=>x.id===id); if(!item){ status('Registro não encontrado.'); return; }
+      currentId = id; objToForm(item); refreshSelect(); status('Ficha carregada.');
+    }
+
+    function duplicar(){
+      const id = $('#selRegistros').value; if(!id){ status('Selecione uma ficha.'); return; }
+      const item = readAll().find(x=>x.id===id); if(!item){ status('Registro não encontrado.'); return; }
+      const copy = {...item, id:newId(), createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(), title:(item.title||'')+' (cópia)'};
+      const list = readAll(); list.unshift(copy); writeAll(list); currentId = copy.id; objToForm(copy); refreshSelect(); status('Ficha duplicada.');
+    }
+
+    function excluir(){
+      const id = $('#selRegistros').value; if(!id){ status('Nada selecionado.'); return; }
+      const next = readAll().filter(x=>x.id!==id); writeAll(next); $('#ficha').reset(); currentId=null; refreshSelect(); updateTotal(); status('Ficha excluída.');
+    }
+
+    // ------ Bind ------
+    document.addEventListener('DOMContentLoaded', ()=>{}); // garantia de ready
+
+    // Botões
+    $('#btnNovo').addEventListener('click', novo);
+    $('#btnAbrir').addEventListener('click', abrir);
+    $('#btnDuplicar').addEventListener('click', duplicar);
+    $('#btnExcluir').addEventListener('click', excluir);
+    $('#btnImprimir').addEventListener('click', ()=> { setTitleFromRef(); window.print(); });
+
+    // Atalhos
+    window.addEventListener('keydown', (e)=>{
+      if(e.ctrlKey && e.key.toLowerCase()==='n'){ e.preventDefault(); novo(); }
+      if(e.ctrlKey && e.key.toLowerCase()==='p'){ e.preventDefault(); setTitleFromRef(); window.print(); }
+    });
+
+    // Autosave + total
+    $('#ficha').addEventListener('input', (ev)=>{ if(ev.target.matches('.gradeQty')) updateTotal(); autosave(); if(ev.target.id==='refField') setTitleFromRef(); });
+    $('#ficha').addEventListener('change', (ev)=>{ if(ev.target.matches('.gradeQty')) updateTotal(); autosave(); });
+
+    // Inicialização
+    refreshSelect();
+    updateTotal();
+    setTitleFromRef();
+  })();
+  </script>
+</body>
+</html>
